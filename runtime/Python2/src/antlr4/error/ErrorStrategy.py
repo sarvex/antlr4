@@ -124,7 +124,7 @@ class DefaultErrorStrategy(ErrorStrategy):
         elif isinstance( e, FailedPredicateException ):
             self.reportFailedPredicate(recognizer, e)
         else:
-            print("unknown recognition error type: " + type(e).__name__)
+            print(f"unknown recognition error type: {type(e).__name__}")
             recognizer.notifyErrorListeners(e.message, e.getOffendingToken(), e)
 
     #
@@ -231,10 +231,6 @@ class DefaultErrorStrategy(ErrorStrategy):
             whatFollowsLoopIterationOrRule = expecting.addSet(self.getErrorRecoverySet(recognizer))
             self.consumeUntil(recognizer, whatFollowsLoopIterationOrRule)
 
-        else:
-            # do nothing if we can't identify the exact kind of ATN state
-            pass
-
     # This is called by {@link #reportError} when the exception is a
     # {@link NoViableAltException}.
     #
@@ -245,14 +241,13 @@ class DefaultErrorStrategy(ErrorStrategy):
     #
     def reportNoViableAlternative(self, recognizer, e):
         tokens = recognizer.getTokenStream()
-        if tokens is not None:
-            if e.startToken.type==Token.EOF:
-                input = "<EOF>"
-            else:
-                input = tokens.getText(e.startToken, e.offendingToken)
-        else:
+        if tokens is None:
             input = "<unknown input>"
-        msg = "no viable alternative at input " + self.escapeWSAndQuote(input)
+        elif e.startToken.type==Token.EOF:
+            input = "<EOF>"
+        else:
+            input = tokens.getText(e.startToken, e.offendingToken)
+        msg = f"no viable alternative at input {self.escapeWSAndQuote(input)}"
         recognizer.notifyErrorListeners(msg, e.offendingToken, e)
 
     #
@@ -265,8 +260,7 @@ class DefaultErrorStrategy(ErrorStrategy):
     # @param e the recognition exception
     #
     def reportInputMismatch(self, recognizer, e):
-        msg = "mismatched input " + self.getTokenErrorDisplay(e.offendingToken) \
-              + " expecting " + e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames)
+        msg = f"mismatched input {self.getTokenErrorDisplay(e.offendingToken)} expecting {e.getExpectedTokens().toString(recognizer.literalNames, recognizer.symbolicNames)}"
         recognizer.notifyErrorListeners(msg, e.offendingToken, e)
 
     #
@@ -280,7 +274,7 @@ class DefaultErrorStrategy(ErrorStrategy):
     #
     def reportFailedPredicate(self, recognizer, e):
         ruleName = recognizer.ruleNames[recognizer._ctx.getRuleIndex()]
-        msg = "rule " + ruleName + " " + e.message
+        msg = f"rule {ruleName} {e.message}"
         recognizer.notifyErrorListeners(msg, e.offendingToken, e)
 
     # This method is called to report a syntax error which requires the removal
@@ -308,8 +302,7 @@ class DefaultErrorStrategy(ErrorStrategy):
         t = recognizer.getCurrentToken()
         tokenName = self.getTokenErrorDisplay(t)
         expecting = self.getExpectedTokens(recognizer)
-        msg = "extraneous input " + tokenName + " expecting " \
-            + expecting.toString(recognizer.literalNames, recognizer.symbolicNames)
+        msg = f"extraneous input {tokenName} expecting {expecting.toString(recognizer.literalNames, recognizer.symbolicNames)}"
         recognizer.notifyErrorListeners(msg, t, None)
 
     # This method is called to report a syntax error which requires the
@@ -334,8 +327,7 @@ class DefaultErrorStrategy(ErrorStrategy):
         self.beginErrorCondition(recognizer)
         t = recognizer.getCurrentToken()
         expecting = self.getExpectedTokens(recognizer)
-        msg = "missing " + expecting.toString(recognizer.literalNames, recognizer.symbolicNames) \
-              + " at " + self.getTokenErrorDisplay(t)
+        msg = f"missing {expecting.toString(recognizer.literalNames, recognizer.symbolicNames)} at {self.getTokenErrorDisplay(t)}"
         recognizer.notifyErrorListeners(msg, t, None)
 
     # <p>The default implementation attempts to recover from the mismatched input
@@ -499,7 +491,7 @@ class DefaultErrorStrategy(ErrorStrategy):
                 name = recognizer.literalNames[expectedTokenType]
             if name is None and expectedTokenType < len(recognizer.symbolicNames):
                 name = recognizer.symbolicNames[expectedTokenType]
-            tokenText = u"<missing " + unicode(name) + u">"
+            tokenText = f"<missing {unicode(name)}>"
         current = currentSymbol
         lookback = recognizer.getTokenStream().LT(-1)
         if current.type==Token.EOF and lookback is not None:
@@ -524,17 +516,14 @@ class DefaultErrorStrategy(ErrorStrategy):
             return u"<no token>"
         s = t.text
         if s is None:
-            if t.type==Token.EOF:
-                s = u"<EOF>"
-            else:
-                s = u"<" + unicode(t.type) + u">"
+            s = u"<EOF>" if t.type==Token.EOF else f"<{unicode(t.type)}>"
         return self.escapeWSAndQuote(s)
 
     def escapeWSAndQuote(self, s):
         s = s.replace(u"\n",u"\\n")
         s = s.replace(u"\r",u"\\r")
         s = s.replace(u"\t",u"\\t")
-        return u"'" + s + u"'"
+        return f"'{s}'"
 
     #  Compute the error recovery set for the current rule.  During
     #  rule invocation, the parser pushes the set of tokens that can
@@ -645,7 +634,7 @@ class DefaultErrorStrategy(ErrorStrategy):
     # Consume tokens until one matches the given token set.#
     def consumeUntil(self, recognizer, set_):
         ttype = recognizer.getTokenStream().LA(1)
-        while ttype != Token.EOF and not ttype in set_:
+        while ttype != Token.EOF and ttype not in set_:
             recognizer.consume()
             ttype = recognizer.getTokenStream().LA(1)
 

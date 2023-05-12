@@ -39,7 +39,7 @@ class ParserInterpreter(Parser):
         self.ruleNames = ruleNames
         self.decisionToDFA = [ DFA(state) for state in atn.decisionToState ]
         self.sharedContextCache = PredictionContextCache()
-        self._parentContextStack = list()
+        self._parentContextStack = []
         # identify the ATN states where pushNewRecursionContext must be called
         self.pushRecursionContextStates = set()
         for state in atn.states:
@@ -142,7 +142,7 @@ class ParserInterpreter(Parser):
         elif tt==Transition.PRECEDENCE:
 
             if not self.precpred(self._ctx, transition.precedence):
-                msg = "precpred(_ctx, " + str(transition.precedence) + ")"
+                msg = f"precpred(_ctx, {str(transition.precedence)})"
                 raise FailedPredicateException(self, msg)
 
         else:

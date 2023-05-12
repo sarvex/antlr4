@@ -147,9 +147,7 @@ class BufferedTokenStream(TokenStream):
         return self.LT(i).type
 
     def LB(self, k):
-        if (self.index-k) < 0:
-            return None
-        return self.tokens[self.index-k]
+        return None if (self.index-k) < 0 else self.tokens[self.index-k]
 
     def LT(self, k):
         self.lazyInit()
@@ -226,7 +224,7 @@ class BufferedTokenStream(TokenStream):
     def getHiddenTokensToRight(self, tokenIndex, channel=-1):
         self.lazyInit()
         if tokenIndex<0 or tokenIndex>=len(self.tokens):
-            raise Exception(str(tokenIndex) + " not in 0.." + str(len(self.tokens)-1))
+            raise Exception(f"{str(tokenIndex)} not in 0..{str(len(self.tokens) - 1)}")
         from antlr4.Lexer import Lexer
         nextOnChannel = self.nextTokenOnChannel(tokenIndex + 1, Lexer.DEFAULT_TOKEN_CHANNEL)
         from_ = tokenIndex+1
@@ -241,7 +239,7 @@ class BufferedTokenStream(TokenStream):
     def getHiddenTokensToLeft(self, tokenIndex, channel=-1):
         self.lazyInit()
         if tokenIndex<0 or tokenIndex>=len(self.tokens):
-            raise Exception(str(tokenIndex) + " not in 0.." + str(len(self.tokens)-1))
+            raise Exception(f"{str(tokenIndex)} not in 0..{str(len(self.tokens) - 1)}")
         from antlr4.Lexer import Lexer
         prevOnChannel = self.previousTokenOnChannel(tokenIndex - 1, Lexer.DEFAULT_TOKEN_CHANNEL)
         if prevOnChannel == tokenIndex - 1:
@@ -262,9 +260,7 @@ class BufferedTokenStream(TokenStream):
                     hidden.append(t)
             elif t.channel==channel:
                     hidden.append(t)
-        if len(hidden)==0:
-            return None
-        return hidden
+        return None if not hidden else hidden
 
     def getSourceName(self):
         return self.tokenSource.getSourceName()

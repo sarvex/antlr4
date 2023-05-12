@@ -163,7 +163,7 @@ class Lexer(Recognizer, TokenSource):
 
     def pushMode(self, m):
         if self._interp.debug:
-            print("pushMode " + str(m), file=self._output)
+            print(f"pushMode {str(m)}", file=self._output)
         self._modeStack.append(self._mode)
         self.mode(m)
 
@@ -171,7 +171,7 @@ class Lexer(Recognizer, TokenSource):
         if len(self._modeStack)==0:
             raise Exception("Empty Stack")
         if self._interp.debug:
-            print("popMode back to "+ self._modeStack[:-1], file=self._output)
+            print(f"popMode back to {self._modeStack[:-1]}", file=self._output)
         self.mode( self._modeStack.pop() )
         return self._mode
 
@@ -252,10 +252,7 @@ class Lexer(Recognizer, TokenSource):
     #  text override.
     @property
     def text(self):
-        if self._text is not None:
-            return self._text
-        else:
-            return self._interp.getText(self._input)
+        return self._interp.getText(self._input) if self._text is None else self._text
 
     # Set the complete text of self token; it wipes any previous
     #  changes to the text.
@@ -278,7 +275,7 @@ class Lexer(Recognizer, TokenSource):
         start = self._tokenStartCharIndex
         stop = self._input.index
         text = self._input.getText(start, stop)
-        msg = u"token recognition error at: '" + self.getErrorDisplay(text) + u"'"
+        msg = f"token recognition error at: '{self.getErrorDisplay(text)}'"
         listener = self.getErrorListenerDispatch()
         listener.syntaxError(self, None, self._tokenStartLine, self._tokenStartColumn, msg, e)
 
@@ -301,7 +298,7 @@ class Lexer(Recognizer, TokenSource):
             return c
 
     def getCharErrorDisplay(self, c):
-        return u"'" + self.getErrorDisplayForChar(c) + u"'"
+        return f"'{self.getErrorDisplayForChar(c)}'"
 
     # Lexers can normally match any char in it's vocabulary after matching
     #  a token, so do the easy thing and just kill a character and hope

@@ -46,7 +46,9 @@ class ATNDeserializer (object):
     def checkVersion(self):
         version = self.readInt()
         if version != SERIALIZED_VERSION:
-            raise Exception("Could not deserialize ATN with version " + str(version) + " (expected " + str(SERIALIZED_VERSION) + ").")
+            raise Exception(
+                f"Could not deserialize ATN with version {str(version)} (expected {str(SERIALIZED_VERSION)})."
+            )
 
     def readATN(self):
         grammarType = self.readInt()
@@ -57,7 +59,7 @@ class ATNDeserializer (object):
         loopBackStateNumbers = []
         endStateNumbers = []
         nstates = self.readInt()
-        for i in range(0, nstates):
+        for _ in range(0, nstates):
             stype = self.readInt()
             # ignore bad type of states
             if stype==ATNState.INVALID_TYPE:
@@ -82,12 +84,12 @@ class ATNDeserializer (object):
             pair[0].endState = atn.states[pair[1]]
 
         numNonGreedyStates = self.readInt()
-        for i in range(0, numNonGreedyStates):
+        for _ in range(0, numNonGreedyStates):
             stateNumber = self.readInt()
             atn.states[stateNumber].nonGreedy = True
 
         numPrecedenceStates = self.readInt()
-        for i in range(0, numPrecedenceStates):
+        for _ in range(0, numPrecedenceStates):
             stateNumber = self.readInt()
             atn.states[stateNumber].isPrecedenceRule = True
 
@@ -114,27 +116,27 @@ class ATNDeserializer (object):
 
     def readModes(self, atn):
         nmodes = self.readInt()
-        for i in range(0, nmodes):
+        for _ in range(0, nmodes):
             s = self.readInt()
             atn.modeToStartState.append(atn.states[s])
 
     def readSets(self, atn, sets):
         m = self.readInt()
-        for i in range(0, m):
+        for _ in range(0, m):
             iset = IntervalSet()
             sets.append(iset)
             n = self.readInt()
             containsEof = self.readInt()
             if containsEof!=0:
                 iset.addOne(-1)
-            for j in range(0, n):
+            for _ in range(0, n):
                 i1 = self.readInt()
                 i2 = self.readInt()
                 iset.addRange(Interval(i1, i2 + 1)) # range upper limit is exclusive
 
     def readEdges(self, atn, sets):
         nedges = self.readInt()
-        for i in range(0, nedges):
+        for _ in range(0, nedges):
             src = self.readInt()
             trg = self.readInt()
             ttype = self.readInt()
@@ -152,9 +154,11 @@ class ATNDeserializer (object):
                 if not isinstance(t, RuleTransition):
                     continue
                 outermostPrecedenceReturn = -1
-                if atn.ruleToStartState[t.target.ruleIndex].isPrecedenceRule:
-                    if t.precedence == 0:
-                        outermostPrecedenceReturn = t.target.ruleIndex
+                if (
+                    atn.ruleToStartState[t.target.ruleIndex].isPrecedenceRule
+                    and t.precedence == 0
+                ):
+                    outermostPrecedenceReturn = t.target.ruleIndex
                 trans = EpsilonTransition(t.followState, outermostPrecedenceReturn)
                 atn.ruleToStopState[t.target.ruleIndex].addTransition(trans)
 
@@ -301,10 +305,14 @@ class ATNDeserializer (object):
             #
             if atn.ruleToStartState[state.ruleIndex].isPrecedenceRule:
                 maybeLoopEndState = state.transitions[len(state.transitions) - 1].target
-                if isinstance(maybeLoopEndState, LoopEndState):
-                    if maybeLoopEndState.epsilonOnlyTransitions and \
-                            isinstance(maybeLoopEndState.transitions[0].target, RuleStopState):
-                        state.isPrecedenceDecision = True
+                if (
+                    isinstance(maybeLoopEndState, LoopEndState)
+                    and maybeLoopEndState.epsilonOnlyTransitions
+                    and isinstance(
+                        maybeLoopEndState.transitions[0].target, RuleStopState
+                    )
+                ):
+                    state.isPrecedenceDecision = True
 
     def verifyATN(self, atn):
         if not self.deserializationOptions.verifyATN:
@@ -375,29 +383,29 @@ class ATNDeserializer (object):
             ef = [None] * 11
             ef[0] = lambda args : None
             ef[Transition.EPSILON] = lambda atn, src, trg, arg1, arg2, arg3, sets, target : \
-                EpsilonTransition(target)
+                    EpsilonTransition(target)
             ef[Transition.RANGE] = lambda atn, src, trg, arg1, arg2, arg3, sets, target : \
-                RangeTransition(target, Token.EOF, arg2) if arg3 != 0 else RangeTransition(target, arg1, arg2)
+                    RangeTransition(target, Token.EOF, arg2) if arg3 != 0 else RangeTransition(target, arg1, arg2)
             ef[Transition.RULE] = lambda atn, src, trg, arg1, arg2, arg3, sets, target : \
-                RuleTransition(atn.states[arg1], arg2, arg3, target)
+                    RuleTransition(atn.states[arg1], arg2, arg3, target)
             ef[Transition.PREDICATE] = lambda atn, src, trg, arg1, arg2, arg3, sets, target : \
-                PredicateTransition(target, arg1, arg2, arg3 != 0)
+                    PredicateTransition(target, arg1, arg2, arg3 != 0)
             ef[Transition.PRECEDENCE] = lambda atn, src, trg, arg1, arg2, arg3, sets, target : \
-                PrecedencePredicateTransition(target, arg1)
+                    PrecedencePredicateTransition(target, arg1)
             ef[Transition.ATOM] = lambda atn, src, trg, arg1, arg2, arg3, sets, target : \
-                AtomTransition(target, Token.EOF) if arg3 != 0 else AtomTransition(target, arg1)
+                    AtomTransition(target, Token.EOF) if arg3 != 0 else AtomTransition(target, arg1)
             ef[Transition.ACTION] = lambda atn, src, trg, arg1, arg2, arg3, sets, target : \
-                ActionTransition(target, arg1, arg2, arg3 != 0)
+                    ActionTransition(target, arg1, arg2, arg3 != 0)
             ef[Transition.SET] = lambda atn, src, trg, arg1, arg2, arg3, sets, target : \
-                SetTransition(target, sets[arg1])
+                    SetTransition(target, sets[arg1])
             ef[Transition.NOT_SET] = lambda atn, src, trg, arg1, arg2, arg3, sets, target : \
-                NotSetTransition(target, sets[arg1])
+                    NotSetTransition(target, sets[arg1])
             ef[Transition.WILDCARD] = lambda atn, src, trg, arg1, arg2, arg3, sets, target : \
-                WildcardTransition(target)
+                    WildcardTransition(target)
             self.edgeFactories = ef
 
         if type> len(self.edgeFactories) or self.edgeFactories[type] is None:
-            raise Exception("The specified transition type: " + str(type) + " is not valid.")
+            raise Exception(f"The specified transition type: {str(type)} is not valid.")
         else:
             return self.edgeFactories[type](atn, src, trg, arg1, arg2, arg3, sets, target)
 
@@ -420,12 +428,11 @@ class ATNDeserializer (object):
             self.stateFactories = sf
 
         if type> len(self.stateFactories) or self.stateFactories[type] is None:
-            raise Exception("The specified state type " + str(type) + " is not valid.")
-        else:
-            s = self.stateFactories[type]()
-            if s is not None:
-                s.ruleIndex = ruleIndex
-            return s
+            raise Exception(f"The specified state type {str(type)} is not valid.")
+        s = self.stateFactories[type]()
+        if s is not None:
+            s.ruleIndex = ruleIndex
+        return s
 
     def lexerActionFactory(self, type, data1, data2):
         if self.actionFactories is None:
@@ -441,6 +448,6 @@ class ATNDeserializer (object):
             self.actionFactories = af
 
         if type> len(self.actionFactories) or self.actionFactories[type] is None:
-            raise Exception("The specified lexer action type " + str(type) + " is not valid.")
+            raise Exception(f"The specified lexer action type {str(type)} is not valid.")
         else:
             return self.actionFactories[type](data1, data2)

@@ -129,7 +129,7 @@ class RangeTransition(Transition):
         return symbol >= self.start and symbol <= self.stop
 
     def __unicode__(self):
-        return "'" + chr(self.start) + "'..'" + chr(self.stop) + "'"
+        return f"'{chr(self.start)}'..'{chr(self.stop)}'"
 
 class AbstractPredicateTransition(Transition):
 
@@ -154,7 +154,7 @@ class PredicateTransition(AbstractPredicateTransition):
         return Predicate(self.ruleIndex, self.predIndex, self.isCtxDependent)
 
     def __unicode__(self):
-        return u"pred_" + unicode(self.ruleIndex) + u":" + unicode(self.predIndex)
+        return f"pred_{unicode(self.ruleIndex)}:{unicode(self.predIndex)}"
 
 class ActionTransition(Transition):
 
@@ -170,7 +170,7 @@ class ActionTransition(Transition):
         return False
 
     def __unicode__(self):
-        return u"action_" + unicode(self.ruleIndex) + u":" + unicode(self.actionIndex)
+        return f"action_{unicode(self.ruleIndex)}:{unicode(self.actionIndex)}"
 
 # A transition containing a set of values.
 class SetTransition(Transition):
@@ -202,7 +202,7 @@ class NotSetTransition(SetTransition):
             and not super(type(self), self).matches(symbol, minVocabSymbol, maxVocabSymbol)
 
     def __unicode__(self):
-        return u'~' + super(type(self), self).__unicode__()
+        return f'~{super(type(self), self).__unicode__()}'
 
 
 class WildcardTransition(Transition):
@@ -234,7 +234,7 @@ class PrecedencePredicateTransition(AbstractPredicateTransition):
         return PrecedencePredicate(self.precedence)
 
     def __unicode__(self):
-        return self.precedence + " >= _p"
+        return f"{self.precedence} >= _p"
 
 
 Transition.serializationTypes = {

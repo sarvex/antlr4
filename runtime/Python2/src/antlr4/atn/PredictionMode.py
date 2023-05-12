@@ -180,19 +180,13 @@ class PredictionMode(object):
             return True
 
         # pure SLL mode parsing
-        if mode == PredictionMode.SLL:
-            # Don't bother with combining configs from different semantic
-            # contexts if we can fail over to full LL; costs more time
-            # since we'll often fail over anyway.
-            if configs.hasSemanticContext:
-                # dup configs, tossing out semantic predicates
-                dup = ATNConfigSet()
-                for c in configs:
-                    c = ATNConfig(config=c, semantic=SemanticContext.NONE)
-                    dup.add(c)
-                configs = dup
-            # now we have combined contexts for configs with dissimilar preds
-
+        if mode == PredictionMode.SLL and configs.hasSemanticContext:
+            # dup configs, tossing out semantic predicates
+            dup = ATNConfigSet()
+            for c in configs:
+                c = ATNConfig(config=c, semantic=SemanticContext.NONE)
+                dup.add(c)
+            configs = dup
         # pure SLL or combined SLL+LL mode parsing
         altsets = cls.getConflictingAltSubsets(configs)
         return cls.hasConflictingAltSet(altsets) and not cls.hasStateAssociatedWithOneAlt(configs)
@@ -411,9 +405,7 @@ class PredictionMode(object):
     #
     @classmethod
     def allSubsetsEqual(cls, altsets):
-        if not altsets:
-            return True
-        return all(alts == altsets[0] for alts in altsets[1:])
+        return True if not altsets else all(alts == altsets[0] for alts in altsets[1:])
 
     #
     # Returns the unique alternative predicted by all alternative subsets in
@@ -425,9 +417,7 @@ class PredictionMode(object):
     @classmethod
     def getUniqueAlt(cls, altsets):
         all = cls.getAlts(altsets)
-        if len(all)==1:
-            return all.pop()
-        return ATN.INVALID_ALT_NUMBER
+        return all.pop() if len(all)==1 else ATN.INVALID_ALT_NUMBER
 
     # Gets the complete set of represented alternatives for a collection of
     # alternative subsets. This method returns the union of each {@link BitSet}
@@ -451,7 +441,7 @@ class PredictionMode(object):
     #
     @classmethod
     def getConflictingAltSubsets(cls, configs):
-        configToAlts = dict()
+        configToAlts = {}
         for c in configs:
             h = hash((c.state.stateNumber, c.context))
             alts = configToAlts.get(h, None)
@@ -471,7 +461,7 @@ class PredictionMode(object):
     #
     @classmethod
     def getStateToAltMap(cls, configs):
-        m = dict()
+        m = {}
         for c in configs:
             alts = m.get(c.state, None)
             if alts is None:

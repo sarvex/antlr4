@@ -17,10 +17,7 @@ class TagChunk(Chunk):
         self.label = label
 
     def __unicode__(self):
-        if self.label is None:
-            return self.tag
-        else:
-            return self.label + ":" + self.tag
+        return self.tag if self.label is None else f"{self.label}:{self.tag}"
 
 class TextChunk(Chunk):
 
@@ -28,5 +25,5 @@ class TextChunk(Chunk):
         self.text = text
 
     def __unicode__(self):
-        return "'" + self.text + "'"
+        return f"'{self.text}'"
 

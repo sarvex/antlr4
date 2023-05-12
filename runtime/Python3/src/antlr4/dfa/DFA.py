@@ -19,21 +19,23 @@ class DFA(object):
         self.decision = decision
         # A set of all DFA states. Use {@link Map} so we can get old state back
         #  ({@link Set} only allows you to see if it's there).
-        self._states = dict()
+        self._states = {}
         self.s0 = None
         # {@code true} if this DFA is for a precedence decision; otherwise,
         # {@code false}. This is the backing field for {@link #isPrecedenceDfa},
         # {@link #setPrecedenceDfa}.
         self.precedenceDfa = False
 
-        if isinstance(atnStartState, StarLoopEntryState):
-            if atnStartState.isPrecedenceDecision:
-                self.precedenceDfa = True
-                precedenceState = DFAState(configs=ATNConfigSet())
-                precedenceState.edges = []
-                precedenceState.isAcceptState = False
-                precedenceState.requiresFullContext = False
-                self.s0 = precedenceState
+        if (
+            isinstance(atnStartState, StarLoopEntryState)
+            and atnStartState.isPrecedenceDecision
+        ):
+            self.precedenceDfa = True
+            precedenceState = DFAState(configs=ATNConfigSet())
+            precedenceState.edges = []
+            precedenceState.isAcceptState = False
+            precedenceState.requiresFullContext = False
+            self.s0 = precedenceState
 
 
     # Get the start state for a specific precedence value.
@@ -96,7 +98,7 @@ class DFA(object):
 
     def setPrecedenceDfa(self, precedenceDfa:bool):
         if self.precedenceDfa != precedenceDfa:
-            self._states = dict()
+            self._states = {}
             if precedenceDfa:
                 precedenceState = DFAState(configs=ATNConfigSet())
                 precedenceState.edges = []

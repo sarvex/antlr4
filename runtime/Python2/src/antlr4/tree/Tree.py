@@ -111,10 +111,7 @@ class TerminalNodeImpl(TerminalNode):
         return unicode(self.symbol.text)
 
     def __unicode__(self):
-        if self.symbol.type == Token.EOF:
-            return u"<EOF>"
-        else:
-            return unicode(self.symbol.text)
+        return u"<EOF>" if self.symbol.type == Token.EOF else unicode(self.symbol.text)
 
 # Represents a token that was consumed during resynchronization
 #  rather than during a valid match operation. For example,

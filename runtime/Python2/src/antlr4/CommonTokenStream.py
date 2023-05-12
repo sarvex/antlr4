@@ -52,9 +52,7 @@ class CommonTokenStream(BufferedTokenStream):
             # skip off-channel tokens
             i = self.previousTokenOnChannel(i - 1, self.channel)
             n += 1
-        if i < 0:
-            return None
-        return self.tokens[i]
+        return None if i < 0 else self.tokens[i]
 
     def LT(self, k):
         self.lazyInit()

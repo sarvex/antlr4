@@ -29,20 +29,17 @@ def _from_utf16(unistr):
                 leading_surrogate = code_unit
             else:
                 yield code_unit
+        elif is_trailing_surrogate(code_unit):
+            yield decode_surrogate_pair(leading_surrogate, code_unit)
+            leading_surrogate = -1
         else:
-            if is_trailing_surrogate(code_unit):
-                # Valid surrogate pair
-                code_point = decode_surrogate_pair(leading_surrogate, code_unit)
+            # Leading surrogate without trailing surrogate
+            yield leading_surrogate
+            if is_leading_surrogate(code_unit):
+                leading_surrogate = code_unit
+            else:
                 yield code_point
                 leading_surrogate = -1
-            else:
-                # Leading surrogate without trailing surrogate
-                yield leading_surrogate
-                if is_leading_surrogate(code_unit):
-                    leading_surrogate = code_unit
-                else:
-                    yield code_point
-                    leading_surrogate = -1
     # Dangling surrogate at end of input
     if leading_surrogate != -1:
         yield leading_surrogate

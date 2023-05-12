@@ -78,7 +78,7 @@ class LexerTypeAction(LexerAction):
             return self.type == other.type
 
     def __unicode__(self):
-        return u"type(" + unicode(self.type) + u")"
+        return f"type({unicode(self.type)})"
 
 
 # Implements the {@code pushMode} lexer action by calling
@@ -106,7 +106,7 @@ class LexerPushModeAction(LexerAction):
             return self.mode == other.mode
 
     def __unicode__(self):
-        return u"pushMode(" + unicode(self.mode) + u")"
+        return f"pushMode({unicode(self.mode)})"
 
 
 # Implements the {@code popMode} lexer action by calling {@link Lexer#popMode}.
@@ -174,7 +174,7 @@ class LexerModeAction(LexerAction):
             return self.mode == other.mode
 
     def __unicode__(self):
-        return u"mode(" + unicode(self.mode) + u")"
+        return f"mode({unicode(self.mode)})"
 
 # Executes a custom lexer action by calling {@link Recognizer#action} with the
 # rule and action indexes assigned to the custom action. The implementation of
@@ -244,7 +244,7 @@ class LexerChannelAction(LexerAction):
             return self.channel == other.channel
 
     def __unicode__(self):
-        return u"channel(" + unicode(self.channel) + u")"
+        return f"channel({unicode(self.channel)})"
 
 # This implementation of {@link LexerAction} is used for tracking input offsets
 # for position-dependent actions within a {@link LexerActionExecutor}.

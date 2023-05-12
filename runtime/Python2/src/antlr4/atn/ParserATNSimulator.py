@@ -286,10 +286,9 @@ class ParserATNSimulator(ATNSimulator):
 
     def adaptivePredict(self, input, decision, outerContext):
         if ParserATNSimulator.debug or ParserATNSimulator.trace_atn_sim:
-            print("adaptivePredict decision " + str(decision) +
-                                   " exec LA(1)==" + self.getLookaheadName(input) +
-                                   " line " + str(input.LT(1).line) + ":" +
-                                   str(input.LT(1).column))
+            print(
+                f"adaptivePredict decision {str(decision)} exec LA(1)=={self.getLookaheadName(input)} line {str(input.LT(1).line)}:{str(input.LT(1).column)}"
+            )
         self._input = input
         self._startIndex = input.index
         self._outerContext = outerContext
@@ -314,9 +313,9 @@ class ParserATNSimulator(ATNSimulator):
                 if outerContext is None:
                     outerContext = ParserRuleContext.EMPTY
                 if ParserATNSimulator.debug:
-                    print("predictATN decision " + str(dfa.decision) +
-                                       " exec LA(1)==" + self.getLookaheadName(input) +
-                                       ", outerContext=" + str(outerContext));#outerContext.toString(self.parser.literalNames, None))
+                    print(
+                        f"predictATN decision {str(dfa.decision)} exec LA(1)=={self.getLookaheadName(input)}, outerContext={str(outerContext)}"
+                    );#outerContext.toString(self.parser.literalNames, None))
 
                 fullCtx = False
                 s0_closure = self.computeStartState(dfa.atnStartState, ParserRuleContext.EMPTY, fullCtx)
@@ -338,7 +337,7 @@ class ParserATNSimulator(ATNSimulator):
 
             alt = self.execATN(dfa, s0, input, index, outerContext)
             if ParserATNSimulator.debug:
-                print("DFA after predictATN: " + dfa.toString(self.parser.literalNames))
+                print(f"DFA after predictATN: {dfa.toString(self.parser.literalNames)}")
             return alt
         finally:
             self._dfa = None
@@ -378,16 +377,14 @@ class ParserATNSimulator(ATNSimulator):
     #
     def execATN(self, dfa, s0, input, startIndex, outerContext ):
         if ParserATNSimulator.debug or ParserATNSimulator.trace_atn_sim:
-            print("execATN decision " + str(dfa.decision) +
-                    ", DFA state " + str(s0) +
-                    ", LA(1)==" + self.getLookaheadName(input) +
-                    " line " + str(input.LT(1).line) + ":" + str(input.LT(1).column))
+            print(
+                f"execATN decision {str(dfa.decision)}, DFA state {str(s0)}, LA(1)=={self.getLookaheadName(input)} line {str(input.LT(1).line)}:{str(input.LT(1).column)}"
+            )
 
         previousD = s0
 
         if ParserATNSimulator.debug:
-            print("s0 = " + str(s0))
-
+            print(f"s0 = {str(previousD)}")
         t = input.LA(1)
 
         while True: # while more work
@@ -433,7 +430,7 @@ class ParserATNSimulator(ATNSimulator):
                         input.seek(conflictIndex)
 
                 if ParserATNSimulator.dfa_debug:
-                    print("ctx sensitive state " + str(outerContext) +" in " + str(D))
+                    print(f"ctx sensitive state {str(outerContext)} in {str(D)}")
                 fullCtx = True
                 s0_closure = self.computeStartState(dfa.atnStartState, outerContext, fullCtx)
                 self.reportAttemptingFullContext(dfa, conflictingAlts, D.configs, startIndex, input.index)
@@ -476,10 +473,7 @@ class ParserATNSimulator(ATNSimulator):
     #
     def getExistingTargetState(self, previousD, t):
         edges = previousD.edges
-        if edges is None or t + 1 < 0 or t + 1 >= len(edges):
-            return None
-        else:
-            return edges[t + 1]
+        return None if edges is None or t < -1 or t + 1 >= len(edges) else edges[t + 1]
 
     #
     # Compute a target state for an edge in the DFA, and attempt to add the
@@ -506,10 +500,9 @@ class ParserATNSimulator(ATNSimulator):
 
         if ParserATNSimulator.debug:
             altSubSets = PredictionMode.getConflictingAltSubsets(reach)
-            print("SLL altSubSets=" + str(altSubSets) + ", configs=" + str(reach) +
-                        ", predict=" + str(predictedAlt) + ", allSubsetsConflict=" +
-                        str(PredictionMode.allSubsetsConflict(altSubSets)) + ", conflictingAlts=" +
-                        str(self.getConflictingAlts(reach)))
+            print(
+                f"SLL altSubSets={str(altSubSets)}, configs={str(reach)}, predict={str(predictedAlt)}, allSubsetsConflict={str(PredictionMode.allSubsetsConflict(altSubSets))}, conflictingAlts={str(self.getConflictingAlts(reach))}"
+            )
 
         if predictedAlt!=ATN.INVALID_ALT_NUMBER:
             # NO CONFLICT, UNIQUELY PREDICTED ALT
@@ -557,7 +550,7 @@ class ParserATNSimulator(ATNSimulator):
                                          startIndex,
                                          outerContext):
         if ParserATNSimulator.debug or ParserATNSimulator.trace_atn_sim:
-            print("execATNWithFullContext", str(s0))
+            print("execATNWithFullContext", s0)
         fullCtx = True
         foundExactAmbig = False
         reach = None
@@ -565,7 +558,7 @@ class ParserATNSimulator(ATNSimulator):
         input.seek(startIndex)
         t = input.LA(1)
         predictedAlt = -1
-        while (True): # while more work
+        while True: # while more work
             reach = self.computeReachSet(previous, t, fullCtx)
             if reach is None:
                 # if any configs in previous dipped into outer context, that
@@ -587,9 +580,9 @@ class ParserATNSimulator(ATNSimulator):
 
             altSubSets = PredictionMode.getConflictingAltSubsets(reach)
             if ParserATNSimulator.debug:
-                print("LL altSubSets=" + str(altSubSets) + ", predict=" +
-                      str(PredictionMode.getUniqueAlt(altSubSets)) + ", resolvesToJustOneViableAlt=" +
-                      str(PredictionMode.resolvesToJustOneViableAlt(altSubSets)))
+                print(
+                    f"LL altSubSets={str(altSubSets)}, predict={str(PredictionMode.getUniqueAlt(altSubSets))}, resolvesToJustOneViableAlt={str(PredictionMode.resolvesToJustOneViableAlt(altSubSets))}"
+                )
 
             reach.uniqueAlt = self.getUniqueAlt(reach)
             # unique prediction?
@@ -600,17 +593,10 @@ class ParserATNSimulator(ATNSimulator):
                 predictedAlt = PredictionMode.resolvesToJustOneViableAlt(altSubSets)
                 if predictedAlt != ATN.INVALID_ALT_NUMBER:
                     break
-            else:
-                # In exact ambiguity mode, we never try to terminate early.
-                # Just keeps scarfing until we know what the conflict is
-                if PredictionMode.allSubsetsConflict(altSubSets) and PredictionMode.allSubsetsEqual(altSubSets):
-                    foundExactAmbig = True
-                    predictedAlt = PredictionMode.getSingleViableAlt(altSubSets)
-                    break
-                # else there are multiple non-conflicting subsets or
-                # we're not sure what the ambiguity is yet.
-                # So, keep going.
-
+            elif PredictionMode.allSubsetsConflict(altSubSets) and PredictionMode.allSubsetsEqual(altSubSets):
+                foundExactAmbig = True
+                predictedAlt = PredictionMode.getSingleViableAlt(altSubSets)
+                break
             previous = reach
             if t != Token.EOF:
                 input.consume()
@@ -656,10 +642,10 @@ class ParserATNSimulator(ATNSimulator):
 
     def computeReachSet(self, closure, t, fullCtx):
         if ParserATNSimulator.debug:
-            print("in computeReachSet, starting closure: " + str(closure))
+            print(f"in computeReachSet, starting closure: {str(closure)}")
 
         if self.mergeCache is None:
-            self.mergeCache = dict()
+            self.mergeCache = {}
 
         intermediate = ATNConfigSet(fullCtx)
 
@@ -678,12 +664,12 @@ class ParserATNSimulator(ATNSimulator):
         # First figure out where we can reach on input t
         for c in closure:
             if ParserATNSimulator.debug:
-                print("testing " + self.getTokenName(t) + " at " + str(c))
+                print(f"testing {self.getTokenName(t)} at {str(c)}")
 
             if isinstance(c.state, RuleStopState):
                 if fullCtx or t == Token.EOF:
                     if skippedStopStates is None:
-                        skippedStopStates = list()
+                        skippedStopStates = []
                     skippedStopStates.append(c)
                 continue
 
@@ -760,12 +746,9 @@ class ParserATNSimulator(ATNSimulator):
                 reach.add(c, self.mergeCache)
 
         if ParserATNSimulator.trace_atn_sim:
-            print("computeReachSet", str(closure), "->", reach)
+            print("computeReachSet", closure, "->", reach)
 
-        if len(reach)==0:
-            return None
-        else:
-            return reach
+        return None if len(reach)==0 else reach
 
     #
     # Return a configuration set containing only the configurations from
@@ -808,8 +791,9 @@ class ParserATNSimulator(ATNSimulator):
         configs = ATNConfigSet(fullCtx)
 
         if ParserATNSimulator.trace_atn_sim:
-            print("computeStartState from ATN state "+str(p)+
-                  " initialContext="+str(initialContext))
+            print(
+                f"computeStartState from ATN state {str(p)} initialContext={str(initialContext)}"
+            )
 
         for i in range(0, len(p.transitions)):
             target = p.transitions[i].target
@@ -875,7 +859,7 @@ class ParserATNSimulator(ATNSimulator):
     # calling {@link Parser#getPrecedence}).
     #
     def applyPrecedenceFilter(self, configs):
-        statesFromAlt1 = dict()
+        statesFromAlt1 = {}
         configSet = ATNConfigSet(configs.fullCtx)
         for config in configs:
             # handle alt 1 first
@@ -912,10 +896,7 @@ class ParserATNSimulator(ATNSimulator):
         return configSet
 
     def getReachableTarget(self, trans, ttype):
-        if trans.matches(ttype, 0, self.atn.maxTokenType):
-            return trans.target
-        else:
-            return None
+        return trans.target if trans.matches(ttype, 0, self.atn.maxTokenType) else None
 
     def getPredsForAmbigAlts(self, ambigAlts, configs, nalts):
         # REACH=[1|1|[]|0:0, 1|2|[]|0:1]
@@ -946,7 +927,7 @@ class ParserATNSimulator(ATNSimulator):
         if nPredAlts==0:
             altToPred = None
         if ParserATNSimulator.debug:
-            print("getPredsForAmbigAlts result " + str_list(altToPred))
+            print(f"getPredsForAmbigAlts result {str_list(altToPred)}")
         return altToPred
 
     def getPredicatePredictions(self, ambigAlts, altToPred):
@@ -960,10 +941,7 @@ class ParserATNSimulator(ATNSimulator):
             if pred is not SemanticContext.NONE:
                 containsPredicate = True
 
-        if not containsPredicate:
-            return None
-
-        return pairs
+        return None if not containsPredicate else pairs
 
     #
     # This method is used to improve the localization of error messages by
@@ -1024,14 +1002,13 @@ class ParserATNSimulator(ATNSimulator):
         return ATN.INVALID_ALT_NUMBER
 
     def getAltThatFinishedDecisionEntryRule(self, configs):
-        alts = set()
-        for c in configs:
-            if c.reachesIntoOuterContext>0 or (isinstance(c.state, RuleStopState) and c.context.hasEmptyPath() ):
-                alts.add(c.alt)
-        if len(alts)==0:
-            return ATN.INVALID_ALT_NUMBER
-        else:
-            return min(alts)
+        alts = {
+            c.alt
+            for c in configs
+            if c.reachesIntoOuterContext > 0
+            or (isinstance(c.state, RuleStopState) and c.context.hasEmptyPath())
+        }
+        return ATN.INVALID_ALT_NUMBER if not alts else min(alts)
 
     # Walk the list of configurations and split them according to
     #  those that have preds evaluating to true/false.  If no pred, assume
@@ -1046,14 +1023,14 @@ class ParserATNSimulator(ATNSimulator):
         succeeded = ATNConfigSet(configs.fullCtx)
         failed = ATNConfigSet(configs.fullCtx)
         for c in configs:
-            if c.semanticContext is not SemanticContext.NONE:
-                predicateEvaluationResult = c.semanticContext.eval(self.parser, outerContext)
-                if predicateEvaluationResult:
-                    succeeded.add(c)
-                else:
-                    failed.add(c)
-            else:
+            if c.semanticContext is SemanticContext.NONE:
                 succeeded.add(c)
+            elif predicateEvaluationResult := c.semanticContext.eval(
+                self.parser, outerContext
+            ):
+                succeeded.add(c)
+            else:
+                failed.add(c)
         return (succeeded,failed)
 
     # Look through a list of predicate/alt pairs, returning alts for the
@@ -1072,11 +1049,11 @@ class ParserATNSimulator(ATNSimulator):
                 continue
             predicateEvaluationResult = pair.pred.eval(self.parser, outerContext)
             if ParserATNSimulator.debug or ParserATNSimulator.dfa_debug:
-                print("eval pred " + str(pair) + "=" + str(predicateEvaluationResult))
+                print(f"eval pred {str(pair)}={str(predicateEvaluationResult)}")
 
             if predicateEvaluationResult:
                 if ParserATNSimulator.debug or ParserATNSimulator.dfa_debug:
-                    print("PREDICT " + str(pair.alt))
+                    print(f"PREDICT {str(pair.alt)}")
                 predictions.add(pair.alt)
                 if not complete:
                     break
@@ -1098,7 +1075,7 @@ class ParserATNSimulator(ATNSimulator):
 
     def closureCheckingStopState(self, config, configs, closureBusy, collectPredicates, fullCtx, depth, treatEofAsEpsilon):
         if ParserATNSimulator.trace_atn_sim:
-            print("closure(" + str(config) + ")")
+            print(f"closure({str(config)})")
 
         if isinstance(config.state, RuleStopState):
             # We hit rule end. If we have context info, use it
@@ -1113,7 +1090,7 @@ class ParserATNSimulator(ATNSimulator):
                         else:
                             # we have no context info, just chase follow links (if greedy)
                             if ParserATNSimulator.debug:
-                                print("FALLING off rule " + self.getRuleName(config.state.ruleIndex))
+                                print(f"FALLING off rule {self.getRuleName(config.state.ruleIndex)}")
                             self.closure_(config, configs, closureBusy, collectPredicates,
                                      fullCtx, depth, treatEofAsEpsilon)
                         continue
@@ -1133,7 +1110,7 @@ class ParserATNSimulator(ATNSimulator):
             else:
                 # else if we have no context info, just chase follow links (if greedy)
                 if ParserATNSimulator.debug:
-                    print("FALLING off rule " + self.getRuleName(config.state.ruleIndex))
+                    print(f"FALLING off rule {self.getRuleName(config.state.ruleIndex)}")
 
         self.closure_(config, configs, closureBusy, collectPredicates, fullCtx, depth, treatEofAsEpsilon)
 
@@ -1164,9 +1141,13 @@ class ParserATNSimulator(ATNSimulator):
                     # come in handy and we avoid evaluating context dependent
                     # preds if this is > 0.
 
-                    if self._dfa is not None and self._dfa.precedenceDfa:
-                        if t.outermostPrecedenceReturn == self._dfa.atnStartState.ruleIndex:
-                            c.precedenceFilterSuppressed = True
+                    if (
+                        self._dfa is not None
+                        and self._dfa.precedenceDfa
+                        and t.outermostPrecedenceReturn
+                        == self._dfa.atnStartState.ruleIndex
+                    ):
+                        c.precedenceFilterSuppressed = True
                     c.reachesIntoOuterContext += 1
                     if c in closureBusy:
                         # avoid infinite recursion for right-recursive rules
@@ -1175,17 +1156,15 @@ class ParserATNSimulator(ATNSimulator):
                     configs.dipsIntoOuterContext = True # TODO: can remove? only care when we add to set per middle of this method
                     newDepth -= 1
                     if ParserATNSimulator.debug:
-                        print("dips into outer ctx: " + str(c))
+                        print(f"dips into outer ctx: {str(c)}")
                 else:
                     if not t.isEpsilon:
                         if c in closureBusy:
                             # avoid infinite recursion for EOF* and EOF+
                             continue
                         closureBusy.add(c)
-                    if isinstance(t, RuleTransition):
-                        # latch when newDepth goes negative - once we step out of the entry context we can't return
-                        if newDepth >= 0:
-                            newDepth += 1
+                    if isinstance(t, RuleTransition) and newDepth >= 0:
+                        newDepth += 1
 
                 self.closureCheckingStopState(c, configs, closureBusy, continueCollecting, fullCtx, newDepth, treatEofAsEpsilon)
 
@@ -1348,7 +1327,7 @@ class ParserATNSimulator(ATNSimulator):
         if self.parser is not None and index>=0:
             return self.parser.ruleNames[index]
         else:
-            return "<rule " + str(index) + ">"
+            return f"<rule {str(index)}>"
 
     epsilonTargetMethods = dict()
     epsilonTargetMethods[Transition.RULE] = lambda sim, config, t, collectPredicates, inContext, fullCtx, treatEofAsEpsilon: \
@@ -1377,15 +1356,18 @@ class ParserATNSimulator(ATNSimulator):
 
     def actionTransition(self, config, t):
         if ParserATNSimulator.debug:
-            print("ACTION edge " + str(t.ruleIndex) + ":" + str(t.actionIndex))
+            print(f"ACTION edge {str(t.ruleIndex)}:{str(t.actionIndex)}")
         return ATNConfig(state=t.target, config=config)
 
     def precedenceTransition(self, config, pt,  collectPredicates, inContext, fullCtx):
         if ParserATNSimulator.debug:
-            print("PRED (collectPredicates=" + str(collectPredicates) + ") " +
-                    str(pt.precedence) + ">=_p, ctx dependent=true")
+            print(
+                f"PRED (collectPredicates={str(collectPredicates)}) {str(pt.precedence)}>=_p, ctx dependent=true"
+            )
             if self.parser is not None:
-                print("context surrounding pred is " + str(self.parser.getRuleInvocationStack()))
+                print(
+                    f"context surrounding pred is {str(self.parser.getRuleInvocationStack())}"
+                )
 
         c = None
         if collectPredicates and inContext:
@@ -1407,18 +1389,21 @@ class ParserATNSimulator(ATNSimulator):
             c = ATNConfig(state=pt.target, config=config)
 
         if ParserATNSimulator.debug:
-            print("config from pred transition=" + str(c))
+            print(f"config from pred transition={str(c)}")
         return c
 
     def predTransition(self, config, pt, collectPredicates, inContext, fullCtx):
         if ParserATNSimulator.debug:
-            print("PRED (collectPredicates=" + str(collectPredicates) + ") " + str(pt.ruleIndex) +
-                    ":" + str(pt.predIndex) + ", ctx dependent=" + str(pt.isCtxDependent))
+            print(
+                f"PRED (collectPredicates={str(collectPredicates)}) {str(pt.ruleIndex)}:{str(pt.predIndex)}, ctx dependent={str(pt.isCtxDependent)}"
+            )
             if self.parser is not None:
-                print("context surrounding pred is " + str(self.parser.getRuleInvocationStack()))
+                print(
+                    f"context surrounding pred is {str(self.parser.getRuleInvocationStack())}"
+                )
 
         c = None
-        if collectPredicates and (not pt.isCtxDependent or (pt.isCtxDependent and inContext)):
+        if collectPredicates and (not pt.isCtxDependent or inContext):
             if fullCtx:
                 # In full context mode, we can evaluate predicates on-the-fly
                 # during closure, which dramatically reduces the size of
@@ -1437,12 +1422,14 @@ class ParserATNSimulator(ATNSimulator):
             c = ATNConfig(state=pt.target, config=config)
 
         if ParserATNSimulator.debug:
-            print("config from pred transition=" + str(c))
+            print(f"config from pred transition={str(c)}")
         return c
 
     def ruleTransition(self, config, t):
         if ParserATNSimulator.debug:
-            print("CALL rule " + self.getRuleName(t.target.ruleIndex) + ", ctx=" + str(config.context))
+            print(
+                f"CALL rule {self.getRuleName(t.target.ruleIndex)}, ctx={str(config.context)}"
+            )
         returnState = t.followState
         newContext = SingletonPredictionContext.create(config.context, returnState.stateNumber)
         return ATNConfig(state=t.target, context=newContext, config=config )
@@ -1489,24 +1476,23 @@ class ParserATNSimulator(ATNSimulator):
 
     def getConflictingAltsOrUniqueAlt(self, configs):
         conflictingAlts = None
-        if configs.uniqueAlt!= ATN.INVALID_ALT_NUMBER:
-            conflictingAlts = set()
-            conflictingAlts.add(configs.uniqueAlt)
-        else:
-            conflictingAlts = configs.conflictingAlts
-        return conflictingAlts
+        return (
+            {configs.uniqueAlt}
+            if configs.uniqueAlt != ATN.INVALID_ALT_NUMBER
+            else configs.conflictingAlts
+        )
 
     def getTokenName(self, t):
         if t==Token.EOF:
             return u"EOF"
         if self.parser is not None and \
-            self.parser.literalNames is not None and \
-            t < len(self.parser.literalNames):
-                return self.parser.literalNames[t] + u"<" + unicode(t) + ">"
+                self.parser.literalNames is not None and \
+                t < len(self.parser.literalNames):
+            return f"{self.parser.literalNames[t]}<{unicode(t)}>"
         if self.parser is not None and \
-                self.parser.symbolicNames is not None and \
-                t < len(self.parser.symbolicNames):
-            return self.parser.symbolicNames[t] + u"<" + unicode(t) + ">"
+                    self.parser.symbolicNames is not None and \
+                    t < len(self.parser.symbolicNames):
+            return f"{self.parser.symbolicNames[t]}<{unicode(t)}>"
         else:
             return unicode(t)
 
@@ -1524,11 +1510,11 @@ class ParserATNSimulator(ATNSimulator):
             if len(c.state.transitions)>0:
                 t = c.state.transitions[0]
                 if isinstance(t, AtomTransition):
-                    trans = "Atom "+ self.getTokenName(t.label)
+                    trans = f"Atom {self.getTokenName(t.label)}"
                 elif isinstance(t, SetTransition):
                     neg = isinstance(t, NotSetTransition)
                     trans = ("~" if neg else "")+"Set "+ str(t.set)
-            print(c.toString(self.parser, True) + ":" + trans, file=sys.stderr)
+            print(f"{c.toString(self.parser, True)}:{trans}", file=sys.stderr)
 
     def noViableAlt(self, input, outerContext, configs, startIndex):
         return NoViableAltException(self.parser, input, input.get(startIndex), input.LT(1), configs, outerContext)
@@ -1564,7 +1550,7 @@ class ParserATNSimulator(ATNSimulator):
     #
     def addDFAEdge(self, dfa, from_, t, to):
         if ParserATNSimulator.debug:
-            print("EDGE " + str(from_) + " -> " + str(to) + " upon " + self.getTokenName(t))
+            print(f"EDGE {str(from_)} -> {str(to)} upon {self.getTokenName(t)}")
 
         if to is None:
             return None
@@ -1605,7 +1591,8 @@ class ParserATNSimulator(ATNSimulator):
 
         existing = dfa.states.get(D, None)
         if existing is not None:
-            if ParserATNSimulator.trace_atn_sim: print("addDFAState", str(D), "exists")
+            if ParserATNSimulator.trace_atn_sim:
+                print("addDFAState", D, "exists")
             return existing
 
         D.stateNumber = len(dfa.states)
@@ -1614,14 +1601,16 @@ class ParserATNSimulator(ATNSimulator):
             D.configs.setReadonly(True)
         dfa.states[D] = D
 
-        if ParserATNSimulator.trace_atn_sim: print("addDFAState new", str(D))
+        if ParserATNSimulator.trace_atn_sim:
+            print("addDFAState new", D)
 
         return D
 
     def reportAttemptingFullContext(self, dfa, conflictingAlts, configs, startIndex, stopIndex):
         if ParserATNSimulator.debug or ParserATNSimulator.retry_debug:
-            print("reportAttemptingFullContext decision=" + str(dfa.decision) + ":" + str(configs) +
-                               ", input=" + self.parser.getTokenStream().getText(startIndex, stopIndex + 1))
+            print(
+                f"reportAttemptingFullContext decision={str(dfa.decision)}:{str(configs)}, input={self.parser.getTokenStream().getText(startIndex, stopIndex + 1)}"
+            )
         if self.parser is not None:
             self.parser.getErrorListenerDispatch().reportAttemptingFullContext(self.parser, dfa, startIndex, stopIndex, conflictingAlts, configs)
 
